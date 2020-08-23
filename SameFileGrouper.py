@@ -312,7 +312,7 @@ def create_path_info(path_line):
 	return result
 #
 
-def get_file_paths(path_info_list):
+def get_abs_file_paths(path_info_list):
 	""" Each path_info dictionary holds path <string> 
 		and is_recursive <boolean> attributes. If path is not recursive,
 		collect files only in that directory. Else, collect every file 
@@ -345,7 +345,7 @@ def get_file_paths(path_info_list):
 
 
 def file_list_grouper(file_paths, info_creator):
-	""" Groups are sets that hold similar files' paths. Groups are 
+	""" Groups are sets that hold similar file paths. Groups are 
 		designated by their corresponding hashables.
 	"""
 	groups = dict()
@@ -377,7 +377,112 @@ def seperate_unique_files_from_groups(file_groups):
 	return [unique_files, new_groups]
 #
 
+
+def multiple_pass_on_groups():
+	pass
+#
+
+def transform_to_new_groups(groups, info_creator):
+	new_groups = dict()
+	
+	
+#
+
+def hex_digest_sha512(file_path, size=1024):
+	""" An info_getter_func. Uses sha512 for file checksum.
+		size is in bytes. Assumes file_path exists and can be read.
+	"""
+	with open(file_path, "rb") as fobj:
+		# b is necessary. Must read as binary file. Not as text.
+		read_bytes = fobj.read(size)
+		
+		m = hashlib.sha512()
+		m.update(read_bytes)
+		hx = m.hexdigest()
+		return hx
+	#
+#
+
+
+def hex_sha512_X_byte(byte_size):
+	def hex_sha512(fpath):
+		return hex_digest_sha512(fpath, byte_size)
+	#
+	return hex_sha512
+#
+
+
+
+def get_file_paths_from_groups(groups):
+	abs_file_set = set()
+	for key, group_set in groups.items():
+		abs_file_set.update(group_set)
+	#
+	
+	abs_file_list = list(abs_file_set)
+	return abs_file_list
+#
+
+def group_files_multi_pass(abs_file_paths, info_creator_funs):
+	""" Using first creator fun, create a group. Seperate uniques and
+		use next creator fun for the remaining groups. Iterate until 
+		there is no creator fun.
+	"""
+	#let's say info_creator_funs have 3 functions.
+	# get_file_size_in_bytes should always be the first info creator because of its speed. 
+	
+	#file_groups = file_list_grouper(abs_file_paths, info_creator_funs[0])
+	
+	#uniques, groups = seperate_unique_files_from_groups(file_groups)
+	
+	#abs_file_list = get_file_paths_from_groups(groups)
+	
+	#file_groups = file_list_grouper(abs_file_list, info_creator_funs[1])
+	
+	#uniques, groups = seperate_unique_files_from_groups(file_groups)
+	
+	#abs_file_list = get_file_paths_from_groups(groups)
+	
+	#file_groups = file_list_grouper(abs_file_list, info_creator_funs[2])
+	
+	#uniques, groups = seperate_unique_files_from_groups(file_groups)
+	
+	groups = dict()
+	uniques = list()
+	for info_creator in info_creator_funs:
+		file_groups = file_list_grouper(abs_file_paths, 
+										info_creator)
+	
+		uniques, groups = seperate_unique_files_from_groups(file_groups)
+	
+		abs_file_paths = get_file_paths_from_groups(groups)
+	
+	
+	for elm in uniques:
+		print(elm)
+	print("**************")
+	for k,v in groups.items():
+		print(k, " | ")
+		for el in v:
+			print(el)
+		#
+		print("-----------------")
+	
+	exit()
+	
+	# for every group, use next info_creator and create new groups.
+#
+
+
 # TODO(armagans): Multiple info_creators and mltiple passes on groups.
+
+# TODO(armagans): After seperating uniques and groups, make a list 
+# of all file in all groups then use them in the next round(info_creator->groups...).
+
+
+# TODO(Armagans): Multiply hash value of a file in a group with its 
+# new hash value after it's put in a new group?
+
 
 if __name__ == "__main__":
 
@@ -387,18 +492,20 @@ if __name__ == "__main__":
 	
 	path_info_list = [create_path_info(el) for el in lines]
 	
-	fpaths = get_file_paths(path_info_list)
+	fpaths = get_abs_file_paths(path_info_list)
 	
-	file_groups = file_list_grouper(fpaths, get_file_size_in_bytes)
+	info_creator_funs = [get_file_size_in_bytes, hex_sha512_X_byte(1024),
+						hex_sha512_X_byte(2048)]
 	
-	uniques, groups = seperate_unique_files_from_groups(file_groups)
+	group_files_multi_pass(fpaths, info_creator_funs)
 	
-	print(uniques)
-	print("***********")
+	
+	#print(uniques)
+	#print("***********")
 	#print(groups)
 	
-	for k,v in groups.items():
-		print(k, " | ", v)
+	#for k,v in groups.items():
+	#	print(k, " | ", v)
 	
 	
 	exit()
