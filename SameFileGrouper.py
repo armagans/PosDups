@@ -288,8 +288,74 @@ def format_output_paths(distinct_paths, similar_groups):
 #
 
 
+def read_all_lines(input_file_path):
+	with open(input_file_path, "r") as f:
+		lines = f.readlines()
+		#print(len(lines))
+		#for el in lines:
+		#	print(el)
+		return lines
+	#
+#
+
+def create_path_info(path_line):
+	left, right = path_line.split("*")
+	left = left.strip()
+	right = right.strip()
+	
+	result = dict() # Holds path info. Path and is_recursive attributes.
+	result["path"] = right
+	
+	left = left.lower()
+	result["is_recursive"] = left.startswith("rec")
+	
+	return result
+#
+
+def get_file_paths(path_info_list):
+	""" Each path_info dictionary holds path <string> 
+		and is_recursive <boolean> attributes. If path is not recursive,
+		collect files only in that directory. Else, collect every file 
+		in the directory and its subdirectories recursively.
+	"""
+	
+	#
+	all_files = []
+	
+	for el in path_info_list:
+		path, is_recursive = el["path"], el["is_recursive"]
+		
+		if is_file(path):
+			all_files.append(path)
+		elif is_dir(path):
+			if is_recursive:
+				all_files.extend(get_fpaths_recursively_from_folder(path))
+			else:
+				fpaths = get_fpaths_from_folder(path)
+				all_files.extend(fpaths)
+		else:
+			# This should not happen. TODO(armagans): Throw Exception?
+			pass
+	return all_files
+#
 
 if __name__ == "__main__":
+
+	input_file_path = "directory paths.txt"
+	
+	lines = read_all_lines(input_file_path)
+	
+	path_info_list = [create_path_info(el) for el in lines]
+	
+	print(path_info_list)
+	
+	
+	
+	fpaths = get_file_paths(path_info_list)
+	for elm in fpaths:
+		print(elm)
+	exit()
+
 	# path = "/media/auser/SAMSUNG/NOT SAMSUNG/Anime-Cartoon-Manga/"
 	path = "/home/auser/Desktop/tmpdir/"
 	# path = "/media/auser/SAMSUNG/NOT SAMSUNG/"
@@ -321,3 +387,4 @@ if __name__ == "__main__":
 	
 	print(time.ctime())
 #
+
