@@ -336,13 +336,13 @@ def get_file_paths(path_info_list):
 		else:
 			# This should not happen. TODO(armagans): Throw Exception?
 			pass
+	#
+	# Absolute paths are needed for set add semantics.
+	all_files = [os.path.abspath(file) for file in all_files]
+	
 	return all_files
 #
 
-# TODO(armagans): Write a function that accepts a list of file paths 
-# which could be same or different. Plus a function that accepts one 
-# file path and returns a hashable value (to be used in a dictionary
-# for grouping). Groups them using hashable values of the files.
 
 def file_list_grouper(file_paths, info_creator):
 	""" Groups are sets that hold similar files' paths. Groups are 
@@ -351,13 +351,30 @@ def file_list_grouper(file_paths, info_creator):
 	groups = dict()
 	for path in file_paths:
 		hashable = info_creator(path)
-		if hashable in groups: # A set exists for this hashable/group.
-			groups[hashable].add(path)
-		else: # A set does not exist for this hashable/group. Create one.
+		
+		if hashable not in groups: # A set exists for this hashable/group.
 			groups[hashable] = set()
-			groups[hashable].add(path)
+			
+		groups[hashable].add(path)
 	#
 	return groups
+#
+
+
+def seperate_unique_files_from_groups(file_groups):
+	unique_files = []
+	one_element_group_size = 1
+	keys = file_groups.keys()
+	new_groups = dict()
+	
+	for key in keys:
+		if len(file_groups[key]) == one_element_group_size:
+			unique_files.append(file_groups[key].pop()) # pop one element from set.
+		else:
+			new_groups[key] = file_groups[key].copy() # copy the set of files
+		#
+	#
+	return [unique_files, new_groups]
 #
 
 
@@ -371,10 +388,17 @@ if __name__ == "__main__":
 	
 	fpaths = get_file_paths(path_info_list)
 	
-	res = file_list_grouper(fpaths, get_file_size_in_bytes)
+	file_groups = file_list_grouper(fpaths, get_file_size_in_bytes)
 	
-	for k, v in res.items():
+	uniques, groups = seperate_unique_files_from_groups(file_groups)
+	
+	print(uniques)
+	print("***********")
+	#print(groups)
+	
+	for k,v in groups.items():
 		print(k, " | ", v)
+	
 	
 	exit()
 
