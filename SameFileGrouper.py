@@ -377,6 +377,7 @@ def seperate_unique_files_from_groups(file_groups):
 	return [unique_files, new_groups]
 #
 
+# TODO(armagans): Multiple info_creators and mltiple passes on groups.
 
 if __name__ == "__main__":
 
