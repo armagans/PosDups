@@ -339,6 +339,28 @@ def get_file_paths(path_info_list):
 	return all_files
 #
 
+# TODO(armagans): Write a function that accepts a list of file paths 
+# which could be same or different. Plus a function that accepts one 
+# file path and returns a hashable value (to be used in a dictionary
+# for grouping). Groups them using hashable values of the files.
+
+def file_list_grouper(file_paths, info_creator):
+	""" Groups are sets that hold similar files' paths. Groups are 
+		designated by their corresponding hashables.
+	"""
+	groups = dict()
+	for path in file_paths:
+		hashable = info_creator(path)
+		if hashable in groups: # A set exists for this hashable/group.
+			groups[hashable].add(path)
+		else: # A set does not exist for this hashable/group. Create one.
+			groups[hashable] = set()
+			groups[hashable].add(path)
+	#
+	return groups
+#
+
+
 if __name__ == "__main__":
 
 	input_file_path = "directory paths.txt"
@@ -347,13 +369,13 @@ if __name__ == "__main__":
 	
 	path_info_list = [create_path_info(el) for el in lines]
 	
-	print(path_info_list)
-	
-	
-	
 	fpaths = get_file_paths(path_info_list)
-	for elm in fpaths:
-		print(elm)
+	
+	res = file_list_grouper(fpaths, get_file_size_in_bytes)
+	
+	for k, v in res.items():
+		print(k, " | ", v)
+	
 	exit()
 
 	# path = "/media/auser/SAMSUNG/NOT SAMSUNG/Anime-Cartoon-Manga/"
