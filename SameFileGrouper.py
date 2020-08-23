@@ -1,4 +1,7 @@
 """
+This program finds same files using size and hash values. It 
+is not guaranteed that files in a group are exactly the same.
+
 Accepts \n separated file and folder paths. By default, runs recursively
 for folders. -Nrec for non recursive (only files in the folder).
 TODO(armagan): -Nrec is unimplemented. Complete -Nrec related code.
@@ -22,14 +25,6 @@ import os
 import hashlib
 import optparse # TODO(armagans): Use it for inputs with option (argument).
 import time
-
-
-
-
-def get_kb(multiplier):
-	kb = 1024
-	return multiplier * kb
-#
 
 
 def is_file(potential_path):
@@ -84,28 +79,6 @@ def get_fpaths_recursively_from_folder(dir_path):
 #
 
 
-def get_paths(path_list, is_recursive):
-	""" Given a path_list, adds files and folders to be processed.
-		if is_recursive == True, directory paths will be processed recursively.
-	"""
-	assert type(path_list) == list
-	#
-	all_files = []
-	
-	for path in path_list:
-		if is_file(path):
-			all_files.append(path)
-		elif is_dir(path):
-			if is_recursive:
-				all_files.extend(get_fpaths_recursively_from_folder(path))
-			else:
-				fpaths = get_fpaths_from_folder(path)
-				all_files.extend(fpaths)
-		
-	return all_files
-#
-
-
 def get_file_size_in_bytes(path):
 	statinfo = os.stat(path)
 	
@@ -113,145 +86,7 @@ def get_file_size_in_bytes(path):
 #
 
 
-def read_and_hex_digest_sha256(file_path, size):
-	""" An info_getter_func. Uses sha256 for file checksum.
-		size is in bytes. Assumes file_path exists and can be read.
-	"""
-	with open(file_path, "rb") as fobj:
-		# b is necessary. Must read as binary file. Not as text.
-		read_bytes = fobj.read(size)
-		
-		m = hashlib.sha256()
-		m.update(read_bytes)
-		hex256 = m.hexdigest()
-		return hex256
-	#
-#
 
-
-def read_and_hex_digest_sha256_X_kb(byte_size):
-	def read_and_hex_sha256(fpath):
-		return read_and_hex_digest_sha256(fpath, byte_size)
-	#
-	return read_and_hex_sha256
-#
-
-
-def separate_singular_group(in_group):
-	"""
-	For a K(group info), V(path_set) of in_group:
-		if V has only one path, add it to distinct_files.
-		else add V to new_group[K].
-	"""
-	distinct_files = []
-	new_group = {}
-	for info, file_set in in_group.items():
-		if len(file_set) == 1:
-			distinct_files.append(file_set.pop())
-		#
-		else:
-			new_group[info] = file_set
-		#
-	return [distinct_files, new_group]
-#
-
-
-def apply_info_func(file_list, info_func):
-	"""
-	Get info from file using info_func.
-	Use that info as key to a dictionary. file path as dict value.
-	"""
-	groups = dict()
-	
-	for fpath in file_list:
-		info = "ERROR"
-		try:
-			info = info_func(fpath)
-		except:
-			print("Error with file:", fpath)
-		else:
-			s = set()
-			
-			if info in groups:
-				s = groups[info]
-			#
-			s.add(fpath) # Add fpath to a path group.
-			groups[info] = s # Grouped by info.
-	#
-	return groups
-#
-
-
-def transform_to_new_group(in_group, info_func):
-	"""
-	Applies info func. to a dictionary.
-	Input : {group_type:file_list} , 
-		a function to transform to a new group.
-	
-	Output : [distinc_file_list, 
-				new_group]
-	"""
-	end_group = dict()
-	end_files = set()
-	
-	for group, in_files in in_group.items():
-		separated_group = apply_info_func(in_files, info_func)
-		distinct_files, new_group = separate_singular_group(separated_group)
-		
-		# TODO(armagans): Make sure extend is the right choice/working choice.
-		end_files.update(distinct_files)
-		for new_info, new_set in new_group.items():
-			if new_info in end_group:
-				s = end_group[new_info]
-				s.update(new_set)
-			#
-			else:
-				end_group[new_info] = new_set
-	#
-	return [end_files, end_group]
-#
-
-
-def apply_all_passes(fpaths):
-	#TODO(armagans) : Take a parameter for separator functions.
-	sha256_first_1kb = read_and_hex_digest_sha256_X_kb(get_kb(1))
-	sha256_first_4kb = read_and_hex_digest_sha256_X_kb(get_kb(4))
-	sha256_first_16kb = read_and_hex_digest_sha256_X_kb(get_kb(16))
-	
-	# TODO(armagans) : name functions like this:
-	sha256_first_32kb = read_and_hex_digest_sha256_X_kb(get_kb(32))
-	
-	all_separator_funcs = [get_file_size_in_bytes]
-						#,sha256_first_1kb]
-						#,sha256_first_4kb]
-						#sha256_first_16kb]
-						#read_hex_digest_sha256_32kb]
-	#
-	
-	# First, apply size info function to all input files. 
-	# Then, apply other info functions.
-	size_info_func = all_separator_funcs.pop(0)
-	groups = apply_info_func(fpaths, size_info_func)
-	distinct_files, new_group = separate_singular_group(groups)
-	# From here on, apply other info functions.
-	end_distinct_files = set()
-	end_group = dict()
-	
-	# TODO(armagans): Solve and complete this mess.
-	end_distinct_files.update(distinct_files)
-	group = new_group
-	
-	while(len(all_separator_funcs) > 0):
-		info_func = all_separator_funcs.pop(0)
-		nfiles, ngroup = transform_to_new_group(group, info_func)
-		
-		end_distinct_files.update(nfiles)
-		group = ngroup
-	#
-	
-	end_group = group
-	return [end_distinct_files, end_group]
-#
 
 
 def format_distinct_path(path, info, separator):
@@ -378,16 +213,6 @@ def seperate_unique_files_from_groups(file_groups):
 #
 
 
-def multiple_pass_on_groups():
-	pass
-#
-
-def transform_to_new_groups(groups, info_creator):
-	new_groups = dict()
-	
-	
-#
-
 def hex_digest_sha512(file_path, size=1024):
 	""" An info_getter_func. Uses sha512 for file checksum.
 		size is in bytes. Assumes file_path exists and can be read.
@@ -428,43 +253,33 @@ def group_files_multi_pass(abs_file_paths, info_creator_funs):
 		use next creator fun for the remaining groups. Iterate until 
 		there is no creator fun.
 	"""
-	#let's say info_creator_funs have 3 functions.
-	# get_file_size_in_bytes should always be the first info creator because of its speed. 
+	# get_file_size_in_bytes should always be the first info creator 
+	# because of its speed. 
 	
-	#file_groups = file_list_grouper(abs_file_paths, info_creator_funs[0])
-	
-	#uniques, groups = seperate_unique_files_from_groups(file_groups)
-	
-	#abs_file_list = get_file_paths_from_groups(groups)
-	
-	#file_groups = file_list_grouper(abs_file_list, info_creator_funs[1])
-	
-	#uniques, groups = seperate_unique_files_from_groups(file_groups)
-	
-	#abs_file_list = get_file_paths_from_groups(groups)
-	
-	#file_groups = file_list_grouper(abs_file_list, info_creator_funs[2])
-	
-	#uniques, groups = seperate_unique_files_from_groups(file_groups)
+	# TODO(armagans): Accumulate unique files. Show them along with 
+	# probably identical files.
 	
 	groups = dict()
 	uniques = list()
 	for info_creator in info_creator_funs:
 		file_groups = file_list_grouper(abs_file_paths, 
-										info_creator)
-	
+										info_creator)	
+		
 		uniques, groups = seperate_unique_files_from_groups(file_groups)
 	
 		abs_file_paths = get_file_paths_from_groups(groups)
+	#
 	
-	
+	# TODO(armagans): Output should be seperate.
 	for elm in uniques:
 		print(elm)
 	print("**************")
 	for k,v in groups.items():
 		print(k, " | ")
 		for el in v:
-			print(el)
+			size = get_file_size_in_bytes(el)
+			size = size//1024 if size//1024 > 1 else size/1024
+			print(size ," - ", el)
 		#
 		print("-----------------")
 	
@@ -473,20 +288,8 @@ def group_files_multi_pass(abs_file_paths, info_creator_funs):
 	# for every group, use next info_creator and create new groups.
 #
 
-
-# TODO(armagans): Multiple info_creators and mltiple passes on groups.
-
-# TODO(armagans): After seperating uniques and groups, make a list 
-# of all file in all groups then use them in the next round(info_creator->groups...).
-
-
-# TODO(Armagans): Multiply hash value of a file in a group with its 
-# new hash value after it's put in a new group?
-
-
-if __name__ == "__main__":
-
-	input_file_path = "directory paths.txt"
+def read_and_work(input_file_path):
+	# input_file_path = "directory paths.txt"
 	
 	lines = read_all_lines(input_file_path)
 	
@@ -498,47 +301,28 @@ if __name__ == "__main__":
 						hex_sha512_X_byte(2048)]
 	
 	group_files_multi_pass(fpaths, info_creator_funs)
-	
-	
-	#print(uniques)
-	#print("***********")
-	#print(groups)
-	
-	#for k,v in groups.items():
-	#	print(k, " | ", v)
+#
+
+
+# TODO(Armagans): Multiply hash value of a file in a group with its 
+# new hash value after it's put in a new group?
+
+# TODO(armagans): Prepend file size for output.
+
+# TODO(armagans): Sort found groups by size.
+
+if __name__ == "__main__":
+
+	input_file_path = "directory paths.txt"
+	read_and_work(input_file_path)
+
 	
 	
 	exit()
 
-	# path = "/media/auser/SAMSUNG/NOT SAMSUNG/Anime-Cartoon-Manga/"
-	path = "/home/auser/Desktop/tmpdir/"
-	# path = "/media/auser/SAMSUNG/NOT SAMSUNG/"
-	
-	# Using sets makes it not vulnerable to same paths.
-	
-	#paths = ["/home/auser/Desktop/tmpdir/"]
-	
-	#paths = ["/media/auser/SAMSUNG/NOT SAMSUNG/ALL BOOKS-PAPERS/"
-			#,"/media/auser/756C16F773C79BA8/ALL BOOKS-PAPERS/"]
-			
-	"""
-	paths = ["/home/auser/Desktop/tmpdir/Wallpapers_0/",
-				"/home/auser/Desktop/tmpdir/Wallpapers_0/",
-				"/home/auser/Desktop/tmpdir/Wallpapers_0 (copy 1)/",
-				"/home/auser/Desktop/tmpdir/"]
-	
-	"""
-	paths = ["/media/auser/SAMSUNG/NOT SAMSUNG/Any backup before 2020-02-16/"]
-	
 	print("Processing paths: ", paths)
 	print(time.ctime())
-	
-	#fpaths = get_fpaths_recursively_from_folder(path)
-	fpaths = get_paths(paths, is_recursive=True)
-	dists, groups = apply_all_passes(fpaths)
-	
-	format_output_paths(dists, groups)
-	
+	#
 	print(time.ctime())
 #
 
