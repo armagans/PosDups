@@ -16,14 +16,16 @@ import os
 import hashlib
 import optparse # TODO(armagans): Use it for inputs with option (argument).
 import time
+import argparse
 
 import util as util
 
 
 
-
-
 def create_path_info(path_line):
+	# Tries to walk path recursively if given line starts with lower 
+	# cased "rec"
+	# TODO(armagans): Add exclude capability.
 	left, right = path_line.split("*")
 	left = left.strip()
 	right = right.strip()
@@ -36,8 +38,6 @@ def create_path_info(path_line):
 	
 	return result
 #
-
-
 
 
 def file_list_grouper(file_paths, info_creator):
@@ -78,9 +78,6 @@ def seperate_unique_files_from_groups(file_groups):
 #
 
 
-
-
-
 def get_file_paths_from_groups(groups):
 	""" Each group is a set. Combine all sets to get all file paths.
 	"""
@@ -94,34 +91,16 @@ def get_file_paths_from_groups(groups):
 #
 
 
-def group_files_multi_pass(abs_file_paths, info_creator_funs):
-	""" Using first creator fun, create a group. Seperate uniques and
-		use next creator fun for the remaining groups. Iterate until 
-		there is no creator fun.
-	"""
-	# get_file_size_in_bytes should always be the first info creator 
-	# because of its speed. 
+def print_results(uniques_all, groups):
 	
-	# TODO(armagans): Accumulate unique files. Show them along with 
-	# probably identical files.
-	
-	groups = dict()
-	uniques = list()
-	for info_creator in info_creator_funs:
-		file_groups = file_list_grouper(abs_file_paths, 
-										info_creator)	
-		
-		uniques, groups = seperate_unique_files_from_groups(file_groups)
-	
-		abs_file_paths = get_file_paths_from_groups(groups)
-	#
-	
-	# TODO(armagans): Output should be seperate.
 	print("Uniques:")
 	unq_cnt = 0
-	for elm in uniques:
+	for elm in uniques_all:
 		size = util.get_file_size_in_bytes(elm)
-		size = str(size//1024) + "Kb" if size//1024 > 1 else str(size) + "B"
+		#size = str(size//1024) + "Kb" if size//1024 > 1 else str(size) + "B"
+		
+		size = util.get_size_str(size)
+		
 		s = util.format_distinct_path(unq_cnt, size, "*", elm)
 		print(s)
 		#print(size,"kb * ", elm)
@@ -133,21 +112,56 @@ def group_files_multi_pass(abs_file_paths, info_creator_funs):
 		#print(k, " | ")
 		for el in v:
 			size = util.get_file_size_in_bytes(el)
-			size = str(size//1024) + "Kb" if size//1024 > 1 else str(size) + "B"
+			#size = str(size//1024) + "Kb" if size//1024 > 1 else str(size) + "B"
+			
+			size = util.get_size_str(size)
+			
 			s = util.format_similar_path(cnt, size, "*", el)
 			print(s)
 			#print(size,"kb * ", el)
 		#
 		cnt += 1
-		print("-----------------*")
-	
-	
-	
-	# for every group, use next info_creator and create new groups.
+		print()
+		#print("-----------------*")
 #
 
-def read_and_work(input_file_path):
+
+def group_files_multi_pass(abs_file_paths, info_creator_funs):
+	""" Using first creator fun, create a group. Seperate uniques and
+		use next creator fun for the remaining groups. Iterate until 
+		there is no creator fun.
+	"""
+	# get_file_size_in_bytes should always be the first info creator 
+	# because of its speed. 
+	
+	groups = dict()
+	uniques_all = list()
+	uniques = list()
+	for info_creator in info_creator_funs:
+		file_groups = file_list_grouper(abs_file_paths, 
+										info_creator)	
+		
+		uniques, groups = seperate_unique_files_from_groups(file_groups)
+		uniques_all.extend(uniques)
+		abs_file_paths = get_file_paths_from_groups(groups)
+	#
+	
+	# TODO(armagans): Output should be separate. Also, don't print, 
+	# write to file. Stdout by default.
+	
+	
+	
+	print_results(uniques_all, groups)
+	
+	
+#
+
+
+def read_and_work(input_file_path, low_filter_bytes, high_filter_bytes):
 	# input_file_path = "directory paths.txt"
+	if low_filter_bytes == None:
+		low_filter_bytes = 0
+	#
 	
 	lines = util.read_all_lines(input_file_path)
 	
@@ -164,18 +178,29 @@ def read_and_work(input_file_path):
 	
 	def filter_func(abs_path):
 		try:
-			size = get_file_size_in_bytes(abs_path)
-			return size >= 1024 * 1024 # Accept on if size >= 1 megabyte
+			size = util.get_file_size_in_bytes(abs_path)
+			decision = True
+			
+			if high_filter_bytes != None:
+				decision = size <= high_filter_bytes # Accept on if size >= low_filter_bytes bytes
+			#
+			decision = decision and size >= low_filter_bytes # Accept on if size >= low_filter_bytes bytes
+			return decision
 		except:
 			return False
 	#
 	
-	#filtered_paths = filter(filter_func, fpaths)
-	filtered_paths = filter(lambda x: True, fpaths)
+	filtered_paths = filter(filter_func, fpaths)
+	#filtered_paths = filter(lambda x: True, fpaths)
+	
 	
 	# TODO(armagans): Reduce hex bytes. External disk takes too long time.
 	info_creator_funs = [util.get_file_size_in_bytes,
-						util.hex_sha512_X_byte(1024*1024)
+						util.hex_sha512_X_byte(4*1024), # 4Kb
+						util.hex_sha512_X_byte(128*1024), # 128Kb
+						util.hex_sha512_X_byte(2*1024*1024) # 2Mb
+						
+						
 						#util.hex_sha512_X_byte(256)
 						]
 	
@@ -189,13 +214,31 @@ def read_and_work(input_file_path):
 # TODO(armagans): Sort found groups by average group size.
 
 if __name__ == "__main__":
-
+	# TODO(armagans): Read from stdin by default.
+	
+	
+	parser = argparse.ArgumentParser()
+	# parser.add_argument("square", type=int, help="display a square of a given number") # Positional arg.
+	parser.add_argument("-fl", "--filterLower", type=int,
+						help="excludes files smaller than given count in bytes.")
+	
+	parser.add_argument("-fh", "--filterHigher", type=int,
+						help="excludes files bigger than given count in bytes.")
+	args = parser.parse_args()
+	
+	#print(args.filterLower * 2)
+	
+	
+		
+	
+	
+	
 	input_file_path = "directory paths.txt"
 	#input_file_path = "external disk.txt"
 	#input_file_path = "ext-disk-1mb-filter-size-1024b-out-fresh.txt"
 	
 	print(time.ctime())
-	read_and_work(input_file_path)
+	read_and_work(input_file_path, args.filterLower, args.filterHigher)
 	
 	print(time.ctime())
 

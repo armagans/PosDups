@@ -142,25 +142,18 @@ def format_similar_path(group_num, size, separator, path):
 #
 
 
-def format_output_paths(distinct_paths, similar_groups):
-	group_paths = []
-	path_cnt = 0
-	for k, v in similar_groups.items():
-		#print("--- ", k ," ---")
-		
-		for x in v:
-			s = format_similar_path(x, path_cnt, ":")
-			group_paths.append(s)
+def get_size_str(size_in_bytes):
+	try:
+		sizes = ["B", "Kb", "Mb", "Gb", "Tb"]
+		x = size_in_bytes
+		i = 0
+		while x > 1024:
+			x = x//1024
+			i += 1
 		#
-		path_cnt += 1
+		return str(x) + sizes[i] if i <= 4 else "bigger than terabyte"
 	#
-	group_output = "\n".join(group_paths)
-	
-	print(group_output)
-	
-	print("--- ", "Distincts" ," ---")
-	#print(dists)
-	for path in dists:
-		print(format_distinct_path(path, "", ":"))
+	except:
+		return "Error calculating size str for " + str(size_in_bytes)
 	#
 #

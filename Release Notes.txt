@@ -1,5 +1,20 @@
+-----
+0.5.0-beta (2020-08-29-22-05):
+	+ Added -fl --filterLower command line option. Given an int, filters
+	files which are smaller or equal than that int in bytes.
+	
+	+ Added -fh --filterHigher command line option. Given an int, filters
+	files which are bigger or equal than that int in bytes.
+	
+	+ Current multi pass sequence: file size, sha512-4Kb, sha512-128Kb
+	sha512-2Mb
+-----
+0.4.0-beta:
+	+ Size str (B, Kb, Mb, Gb, Tb) is calculated in a function up to Tb 
+	for output formatting.
+-----
 0.3.0-beta:
 	+ Output formatting added to util.py and used crudely in PosDups.py.
-
+-----
 0.2.0-beta (2020-08-29-19-30):
 	+ Added util.py which holds utility functions related to core logic.
