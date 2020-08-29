@@ -21,49 +21,7 @@ import util as util
 
 
 
-def format_distinct_path(path, info, separator):
-	return "Distinct" + str(info) + separator + path
-#
 
-
-def format_similar_path(path, info, separator):
-	return "Group-" + str(info) + separator + path
-#
-
-
-def format_output_paths(distinct_paths, similar_groups):
-	group_paths = []
-	path_cnt = 0
-	for k, v in similar_groups.items():
-		#print("--- ", k ," ---")
-		
-		for x in v:
-			s = format_similar_path(x, path_cnt, ":")
-			group_paths.append(s)
-		#
-		path_cnt += 1
-	#
-	group_output = "\n".join(group_paths)
-	
-	print(group_output)
-	
-	print("--- ", "Distincts" ," ---")
-	#print(dists)
-	for path in dists:
-		print(format_distinct_path(path, "", ":"))
-	#
-#
-
-
-def read_all_lines(input_file_path):
-	with open(input_file_path, "r") as f:
-		lines = f.readlines()
-		#print(len(lines))
-		#for el in lines:
-		#	print(el)
-		return lines
-	#
-#
 
 def create_path_info(path_line):
 	left, right = path_line.split("*")
@@ -79,36 +37,7 @@ def create_path_info(path_line):
 	return result
 #
 
-def get_abs_file_paths(path_info_list):
-	""" Each path_info dictionary holds path <string> 
-		and is_recursive <boolean> attributes. If path is not recursive,
-		collect files only in that directory. Else, collect every file 
-		in the directory and its subdirectories recursively.
-	"""
-	
-	#
-	all_files = []
-	
-	for el in path_info_list:
-		path, is_recursive = el["path"], el["is_recursive"]
-		
-		if util.is_file(path):
-			all_files.append(path)
-		elif util.is_dir(path):
-			if is_recursive:
-				all_files.extend(util.get_fpaths_recursively_from_folder(path))
-			else:
-				fpaths = util.get_fpaths_from_folder(path)
-				all_files.extend(fpaths)
-		else:
-			# This should not happen. TODO(armagans): Throw Exception?
-			pass
-	#
-	# Absolute paths are needed for set add semantics.
-	all_files = [os.path.abspath(file) for file in all_files]
-	
-	return all_files
-#
+
 
 
 def file_list_grouper(file_paths, info_creator):
@@ -149,28 +78,7 @@ def seperate_unique_files_from_groups(file_groups):
 #
 
 
-def hex_digest_sha512(file_path, size):
-	""" An info_getter_func. Uses sha512 for file checksum.
-		size is in bytes. Assumes file_path exists and can be read.
-	"""
-	with open(file_path, "rb") as fobj:
-		# b is necessary. Must read as binary file. Not as text.
-		read_bytes = fobj.read(size)
-		
-		m = hashlib.sha512()
-		m.update(read_bytes)
-		hx = m.hexdigest()
-		return hx
-	#
-#
 
-
-def hex_sha512_X_byte(byte_size):
-	def hex_sha512(fpath):
-		return hex_digest_sha512(fpath, byte_size)
-	#
-	return hex_sha512
-#
 
 
 def get_file_paths_from_groups(groups):
@@ -210,19 +118,27 @@ def group_files_multi_pass(abs_file_paths, info_creator_funs):
 	
 	# TODO(armagans): Output should be seperate.
 	print("Uniques:")
+	unq_cnt = 0
 	for elm in uniques:
 		size = util.get_file_size_in_bytes(elm)
-		size = size//1024 if size//1024 > 1 else size/1024
-		print(size,"kb * ", elm)
+		size = str(size//1024) + "Kb" if size//1024 > 1 else str(size) + "B"
+		s = util.format_distinct_path(unq_cnt, size, "*", elm)
+		print(s)
+		#print(size,"kb * ", elm)
+		unq_cnt += 1
 	print("**************")
 	print("Probably identical files in groups:")
+	cnt = 0
 	for k,v in groups.items():
 		#print(k, " | ")
 		for el in v:
 			size = util.get_file_size_in_bytes(el)
-			size = size//1024 if size//1024 > 1 else size/1024
-			print(size,"kb * ", el)
+			size = str(size//1024) + "Kb" if size//1024 > 1 else str(size) + "B"
+			s = util.format_similar_path(cnt, size, "*", el)
+			print(s)
+			#print(size,"kb * ", el)
 		#
+		cnt += 1
 		print("-----------------*")
 	
 	
@@ -233,7 +149,7 @@ def group_files_multi_pass(abs_file_paths, info_creator_funs):
 def read_and_work(input_file_path):
 	# input_file_path = "directory paths.txt"
 	
-	lines = read_all_lines(input_file_path)
+	lines = util.read_all_lines(input_file_path)
 	
 	path_info_list = []
 	for el in lines:
@@ -243,7 +159,7 @@ def read_and_work(input_file_path):
 		except:
 			continue
 	
-	fpaths = get_abs_file_paths(path_info_list)
+	fpaths = util.get_abs_file_paths(path_info_list)
 
 	
 	def filter_func(abs_path):
@@ -259,15 +175,15 @@ def read_and_work(input_file_path):
 	
 	# TODO(armagans): Reduce hex bytes. External disk takes too long time.
 	info_creator_funs = [util.get_file_size_in_bytes,
-						hex_sha512_X_byte(1024)
-						#hex_sha512_X_byte(256)
+						util.hex_sha512_X_byte(1024*1024)
+						#util.hex_sha512_X_byte(256)
 						]
 	
 	group_files_multi_pass(filtered_paths, info_creator_funs)
 #
 
 
-# TODO(Armagans): Multiply hash value of a file in a group with its 
+# TODO(armagans): Multiply hash value of a file in a group with its 
 # new hash value after it's put in a new group?
 
 # TODO(armagans): Sort found groups by average group size.
