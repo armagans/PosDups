@@ -1,0 +1,2 @@
+0.2.0.beta (2020-08-29):
+	+ Added util.py which holds utility functions related to core logic.

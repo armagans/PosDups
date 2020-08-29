@@ -17,64 +17,8 @@ import hashlib
 import optparse # TODO(armagans): Use it for inputs with option (argument).
 import time
 
+import util as util
 
-def is_file(potential_path):
-	"""
-	Return True if given path is a valid file.
-	Else returns False.
-	"""
-	return os.path.isfile(potential_path)
-#
-
-
-def is_dir(potential_path):
-	"""
-	Return True if given path is a valid directory.
-	Else returns False.
-	"""
-	return os.path.isdir(potential_path)
-#
-
-
-def get_paths_from_folder(dir_path):
-	"""
-	Returns all paths containing inside the given argument.
-	!ERROR! if (folder_path) is not a valid folder.
-	"""
-	#TODO:(armagans) : Check for validness of argument. Return error if
-	# it's the right thing.
-	return os.listdir(dir_path)
-#
-
-
-def get_fpaths_from_folder(dir_path):
-	fpaths = list()
-	
-	for p in get_paths_from_folder(dir_path):
-		path = dir_path + p # For absolute path.
-		if is_file(path):
-			fpaths.append(path)
-	#
-	return fpaths
-#
-
-
-def get_fpaths_recursively_from_folder(dir_path):
-	rec_files = list()
-	for root, dirs, files in os.walk(dir_path):
-		for name in files:
-			rec_files.append(os.path.join(root, name))
-		#
-	#
-	return rec_files
-#
-
-
-def get_file_size_in_bytes(path):
-	statinfo = os.stat(path)
-	
-	return statinfo.st_size
-#
 
 
 def format_distinct_path(path, info, separator):
@@ -148,13 +92,13 @@ def get_abs_file_paths(path_info_list):
 	for el in path_info_list:
 		path, is_recursive = el["path"], el["is_recursive"]
 		
-		if is_file(path):
+		if util.is_file(path):
 			all_files.append(path)
-		elif is_dir(path):
+		elif util.is_dir(path):
 			if is_recursive:
-				all_files.extend(get_fpaths_recursively_from_folder(path))
+				all_files.extend(util.get_fpaths_recursively_from_folder(path))
 			else:
-				fpaths = get_fpaths_from_folder(path)
+				fpaths = util.get_fpaths_from_folder(path)
 				all_files.extend(fpaths)
 		else:
 			# This should not happen. TODO(armagans): Throw Exception?
@@ -267,7 +211,7 @@ def group_files_multi_pass(abs_file_paths, info_creator_funs):
 	# TODO(armagans): Output should be seperate.
 	print("Uniques:")
 	for elm in uniques:
-		size = get_file_size_in_bytes(elm)
+		size = util.get_file_size_in_bytes(elm)
 		size = size//1024 if size//1024 > 1 else size/1024
 		print(size,"kb * ", elm)
 	print("**************")
@@ -275,7 +219,7 @@ def group_files_multi_pass(abs_file_paths, info_creator_funs):
 	for k,v in groups.items():
 		#print(k, " | ")
 		for el in v:
-			size = get_file_size_in_bytes(el)
+			size = util.get_file_size_in_bytes(el)
 			size = size//1024 if size//1024 > 1 else size/1024
 			print(size,"kb * ", el)
 		#
@@ -314,7 +258,7 @@ def read_and_work(input_file_path):
 	filtered_paths = filter(lambda x: True, fpaths)
 	
 	# TODO(armagans): Reduce hex bytes. External disk takes too long time.
-	info_creator_funs = [get_file_size_in_bytes,
+	info_creator_funs = [util.get_file_size_in_bytes,
 						hex_sha512_X_byte(1024)
 						#hex_sha512_X_byte(256)
 						]

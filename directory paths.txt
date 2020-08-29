@@ -1,2 +1,15 @@
+Add  Recursive *  if you want the files recursively from the path after *
+Don't add   Recursive   before  *  character if only that directory's files are wanted.
+Paths can be directories or files.
+
+* this/path/won't/be/recursively/searched
+Recursive * this/path/will/be/searched/recursively
+
+
+
 Recursive * ../
 * ./
+* /media/ulimited/SharedWithLinux/ALL BOOKS-PAPERS/Non-academic Documents-Books/
+Recursive * /media/ulimited/SharedWithLinux/ALL BOOKS-PAPERS
+Recursive * /home/ulimited/Desktop/already in usb drive/
+* ./bad-path
