@@ -1,6 +1,0 @@
-13183 files
-	Fresh 1mb filter, size, 1024b sha512 pass
-		Sun Aug 23 21:34:41 2020 -> Sun Aug 23 21:45:45 2020
-	
-	1mb filter, size, 1024b sha512 out files as input
-		Sun Aug 23 21:59:09 2020 -> Sun Aug 23 22:05:38 2020
