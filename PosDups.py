@@ -2,23 +2,14 @@
 This program finds same files using size and hash values. It 
 is not guaranteed that files in a group are exactly the same.
 
-Accepts \n separated file and folder paths. By default, runs recursively
-for folders. -Nrec for non recursive (only files in the folder).
-TODO(armagan): -Nrec is unimplemented. Complete -Nrec related code.
+In main, input_file_path holds a txt file that contains paths to be searched.
+In the txt file, if a path is to be searched recursively, prepend 
+Recursive *
+to that path. Else, prepend * character to path.
 
-Returns distinct files and similar files according to 
-their size/sha256/etc. According to passes in 'apply_all_passes(fpaths)'
+!Enable filter_func in read_and_work if there are thousands of small files.
 
-Usage: (must change 'path' variable in main for now.) 
-(Give a minute or two for completion of 4k files from hard disk.)
-python3 SimilarFileFinder_v_0.4.py > output.txt
-
-Creator : armagans (armagansalman@gmail.com)
-TODO(armagans) : Exception handling. Handle in sha256/ get byte/ functions.
-TODO(armagans) : Accept one path arg || several paths from a file ||
-	several paths from arg.
-TODO(armagans) : non recursive walk option.
-TODO(armagans) : Exception print to stderr
+TODO(armagans): Handle the case Recursive * Valid/file/path
 """
 
 import os
@@ -84,9 +75,6 @@ def get_file_size_in_bytes(path):
 	
 	return statinfo.st_size
 #
-
-
-
 
 
 def format_distinct_path(path, info, separator):
@@ -185,7 +173,11 @@ def file_list_grouper(file_paths, info_creator):
 	"""
 	groups = dict()
 	for path in file_paths:
-		hashable = info_creator(path)
+		try:
+			hashable = info_creator(path)
+		except:
+			print("Error with path '%s'.", path)
+			continue
 		
 		if hashable not in groups: # A set exists for this hashable/group.
 			groups[hashable] = set()
@@ -213,7 +205,7 @@ def seperate_unique_files_from_groups(file_groups):
 #
 
 
-def hex_digest_sha512(file_path, size=1024):
+def hex_digest_sha512(file_path, size):
 	""" An info_getter_func. Uses sha512 for file checksum.
 		size is in bytes. Assumes file_path exists and can be read.
 	"""
@@ -237,8 +229,9 @@ def hex_sha512_X_byte(byte_size):
 #
 
 
-
 def get_file_paths_from_groups(groups):
+	""" Each group is a set. Combine all sets to get all file paths.
+	"""
 	abs_file_set = set()
 	for key, group_set in groups.items():
 		abs_file_set.update(group_set)
@@ -247,6 +240,7 @@ def get_file_paths_from_groups(groups):
 	abs_file_list = list(abs_file_set)
 	return abs_file_list
 #
+
 
 def group_files_multi_pass(abs_file_paths, info_creator_funs):
 	""" Using first creator fun, create a group. Seperate uniques and
@@ -271,19 +265,23 @@ def group_files_multi_pass(abs_file_paths, info_creator_funs):
 	#
 	
 	# TODO(armagans): Output should be seperate.
+	print("Uniques:")
 	for elm in uniques:
-		print(elm)
+		size = get_file_size_in_bytes(elm)
+		size = size//1024 if size//1024 > 1 else size/1024
+		print(size,"kb * ", elm)
 	print("**************")
+	print("Probably identical files in groups:")
 	for k,v in groups.items():
-		print(k, " | ")
+		#print(k, " | ")
 		for el in v:
 			size = get_file_size_in_bytes(el)
 			size = size//1024 if size//1024 > 1 else size/1024
-			print(size ," - ", el)
+			print(size,"kb * ", el)
 		#
-		print("-----------------")
+		print("-----------------*")
 	
-	exit()
+	
 	
 	# for every group, use next info_creator and create new groups.
 #
@@ -293,36 +291,53 @@ def read_and_work(input_file_path):
 	
 	lines = read_all_lines(input_file_path)
 	
-	path_info_list = [create_path_info(el) for el in lines]
+	path_info_list = []
+	for el in lines:
+		try:
+			info = create_path_info(el)
+			path_info_list.append(info)
+		except:
+			continue
 	
 	fpaths = get_abs_file_paths(path_info_list)
+
 	
-	info_creator_funs = [get_file_size_in_bytes, hex_sha512_X_byte(1024),
-						hex_sha512_X_byte(2048)]
+	def filter_func(abs_path):
+		try:
+			size = get_file_size_in_bytes(abs_path)
+			return size >= 1024 * 1024 # Accept on if size >= 1 megabyte
+		except:
+			return False
+	#
 	
-	group_files_multi_pass(fpaths, info_creator_funs)
+	#filtered_paths = filter(filter_func, fpaths)
+	filtered_paths = filter(lambda x: True, fpaths)
+	
+	# TODO(armagans): Reduce hex bytes. External disk takes too long time.
+	info_creator_funs = [get_file_size_in_bytes,
+						hex_sha512_X_byte(1024)
+						#hex_sha512_X_byte(256)
+						]
+	
+	group_files_multi_pass(filtered_paths, info_creator_funs)
 #
 
 
 # TODO(Armagans): Multiply hash value of a file in a group with its 
 # new hash value after it's put in a new group?
 
-# TODO(armagans): Prepend file size for output.
-
-# TODO(armagans): Sort found groups by size.
+# TODO(armagans): Sort found groups by average group size.
 
 if __name__ == "__main__":
 
 	input_file_path = "directory paths.txt"
+	#input_file_path = "external disk.txt"
+	#input_file_path = "ext-disk-1mb-filter-size-1024b-out-fresh.txt"
+	
+	print(time.ctime())
 	read_and_work(input_file_path)
-
 	
-	
-	exit()
+	print(time.ctime())
 
-	print("Processing paths: ", paths)
-	print(time.ctime())
-	#
-	print(time.ctime())
 #
 
