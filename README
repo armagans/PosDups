@@ -1,4 +1,4 @@
-PosDup: Finds possibly duplicate files. Written in Python. No dependencies.
+PosDups: Finds possibly duplicate files. Written in Python. No dependencies.
 
 Put directory or file paths in "directory paths.txt" file on separate 
 lines.
