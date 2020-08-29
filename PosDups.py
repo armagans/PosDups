@@ -215,6 +215,7 @@ def read_and_work(input_file_path, low_filter_bytes, high_filter_bytes):
 
 if __name__ == "__main__":
 	# TODO(armagans): Read from stdin by default.
+	# TODO(armagans): Sort groups by size.
 	
 	
 	parser = argparse.ArgumentParser()

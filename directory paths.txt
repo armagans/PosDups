@@ -12,4 +12,4 @@ Recursive * ../
 * /media/ulimited/SharedWithLinux/ALL BOOKS-PAPERS/Non-academic Documents-Books/
 Recursive * /media/ulimited/SharedWithLinux/ALL BOOKS-PAPERS
 Recursive * /home/ulimited/Desktop/already in usb drive/
-* ./bad-path
+* ./bad-path-no-problem
