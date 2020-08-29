@@ -2,7 +2,7 @@ PosDups: Finds possibly duplicate files. Written in Python. No dependencies.
 
 Put directory or file paths in "directory paths.txt" file on separate 
 lines.
-Read "directory paths.txt" to understand how to make PosDup search a 
+Read "directory paths.txt" to understand how to make PosDups search a 
 directory recursively.
 
 Use --help option to see usage of file filters by size.
