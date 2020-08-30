@@ -1,3 +1,11 @@
+0.7.0-beta:
+	+ posdups now reads paths only from stdin.
+	Example:
+		python3 __main__.py < "../paths.txt"  > "out file.txt"
+		This command reads paths from paths.txt and writes results to 
+		"out file.txt". Don't forget to use "" if the file name contains
+		spaces.
+-----
 0.6.0-beta (2020-08-30-12-25):
 	+ Added -hs --hashes option which accepts a sequence of bytes to be 
 	used in checksum.

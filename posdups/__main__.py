@@ -1,11 +1,11 @@
 import time
 import argparse
+import sys
 
 
 import PosDups as PD
 
 if __name__ == "__main__":
-	# TODO(armagans): Read from stdin by default.
 	# TODO(armagans): Sort groups by size.
 	
 	
@@ -24,12 +24,13 @@ if __name__ == "__main__":
 	args = parser.parse_args()
 	
 	
-	input_file_path = "../directory paths.txt"
+	
+	input_file_path = "../paths.txt"
 	#input_file_path = "../external disk.txt"
 	#input_file_path = ""
 	
 	print(time.ctime())
-	PD.read_and_work(input_file_path, args)
+	PD.read_and_work(sys.stdin, args)
 	
 	print(time.ctime())
 

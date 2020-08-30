@@ -173,7 +173,7 @@ def group_files_multi_pass(abs_file_paths, info_creator_funs):
 #
 
 
-def read_and_work(input_file_path, args):
+def read_and_work(file_obj, args):
 	# input_file_path = "directory paths.txt"
 	low_filter_bytes = args.filterLower
 	high_filter_bytes = args.filterHigher
@@ -183,7 +183,7 @@ def read_and_work(input_file_path, args):
 		low_filter_bytes = 0
 	#
 	
-	lines = util.read_all_lines(input_file_path)
+	lines = file_obj.readlines()
 	
 	path_info_list = []
 	for el in lines:
