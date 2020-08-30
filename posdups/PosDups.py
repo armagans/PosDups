@@ -21,8 +21,6 @@ TODO(armagans): Handle the case Recursive * Valid/file/path
 
 import os
 import hashlib
-import time
-import argparse
 
 import util
 
@@ -41,6 +39,11 @@ def create_path_info(path_line):
 	
 	left = left.lower()
 	result["is_recursive"] = left.startswith("rec")
+	exclude = True if left[-1] == "x" else False
+	result["exclude"] = exclude
+	
+	print(path_line)
+	print(result)
 	
 	return result
 #
@@ -212,25 +215,17 @@ def read_and_work(input_file_path, args):
 	
 	filtered_paths = filter(filter_func, fpaths)
 	
-	info_creator_funs = []
 	if hashes == None:
 		# default sha512 sequence: 1*1024, 16*1024, 1*1024*1024
 		# TODO(armagans): Reduce hex bytes (maybe 1Mb). External disk takes too long time.
-		info_creator_funs = [util.get_file_size_in_bytes,
-							util.hex_sha512_X_byte(1*1024),
-							util.hex_sha512_X_byte(16*1024),
-							util.hex_sha512_X_byte(1*1024*1024)
-							]
+		hashes = "1kb,16kb,1mb"
 	#
-	else:
-		byte_seq = util.get_bytes_from_size_seq(hashes)
-		info_creator_funs = [util.get_file_size_in_bytes]
-		for byt in byte_seq:
-			info_creator_funs.append(util.hex_sha512_X_byte(byt))
-		#
-	#
-		
+	byte_seq = util.get_bytes_from_size_seq(hashes)
+	info_creator_funs = [util.get_file_size_in_bytes]
 	
+	for byt in byte_seq:
+		info_creator_funs.append(util.hex_sha512_X_byte(byt))
+	#
 	
 	group_files_multi_pass(filtered_paths, info_creator_funs)
 #
@@ -241,34 +236,4 @@ def read_and_work(input_file_path, args):
 
 # TODO(armagans): Sort found groups by average group size.
 
-if __name__ == "__main__":
-	# TODO(armagans): Read from stdin by default.
-	# TODO(armagans): Sort groups by size.
-	
-	
-	parser = argparse.ArgumentParser()
-	# parser.add_argument("square", type=int, help="display a square of a given number") # Positional arg.
-	parser.add_argument("-fl", "--filterLower", type=int,
-						help="excludes files smaller than given count in bytes.")
-	
-	parser.add_argument("-fh", "--filterHigher", type=int,
-						help="excludes files bigger than given count in bytes.")
-						
-	parser.add_argument("-hs", "--hashes",
-						help="denotes the checksum byte sequence. Ex: 128Kb, 4Mb, 2Gb")
-						
-						
-	args = parser.parse_args()
-	
-	
-	input_file_path = "directory paths.txt"
-	#input_file_path = "external disk.txt"
-	#input_file_path = ""
-	
-	print(time.ctime())
-	read_and_work(input_file_path, args)
-	
-	print(time.ctime())
-
-#
 

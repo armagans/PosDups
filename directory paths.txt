@@ -13,3 +13,8 @@ Recursive * ../
 Recursive * /media/ulimited/SharedWithLinux/ALL BOOKS-PAPERS
 Recursive * /home/ulimited/Desktop/already in usb drive/
 * ./bad-path-no-problem
+
+Exclude paths (not implemented yet):
+
+X* ../
+Recursive X* /home/ulimited/Desktop/already in usb drive/
