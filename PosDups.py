@@ -18,7 +18,7 @@ import optparse # TODO(armagans): Use it for inputs with option (argument).
 import time
 import argparse
 
-import util as util
+import util
 
 
 
@@ -41,7 +41,7 @@ def create_path_info(path_line):
 
 
 def file_list_grouper(file_paths, info_creator):
-	""" Groups are sets that hold similar file paths. Groups are 
+	""" Groups are sets that hold paths of similar files. Groups are 
 		designated by their corresponding hashables.
 	"""
 	groups = dict()
@@ -92,7 +92,7 @@ def get_file_paths_from_groups(groups):
 
 
 def print_results(uniques_all, groups):
-	
+	total = 0
 	print("Uniques:")
 	unq_cnt = 0
 	for elm in uniques_all:
@@ -105,6 +105,8 @@ def print_results(uniques_all, groups):
 		print(s)
 		#print(size,"kb * ", elm)
 		unq_cnt += 1
+		total += 1
+	#
 	print("**************")
 	print("Probably identical files in groups:")
 	cnt = 0
@@ -119,10 +121,12 @@ def print_results(uniques_all, groups):
 			s = util.format_similar_path(cnt, size, "*", el)
 			print(s)
 			#print(size,"kb * ", el)
+			total += 1
 		#
 		cnt += 1
 		print()
-		#print("-----------------*")
+	#	#print("-----------------*")
+	print("Processed {} files.".format(total))
 #
 
 
@@ -133,6 +137,12 @@ def group_files_multi_pass(abs_file_paths, info_creator_funs):
 	"""
 	# get_file_size_in_bytes should always be the first info creator 
 	# because of its speed. 
+	
+	# TODO(armagans): Check why 1325 files are going to be processed. but
+	# Processed 1246 files. for "directory paths.txt"
+	
+	abs_file_paths = list(abs_file_paths)
+	print("{} files are going to be processed.".format(len(abs_file_paths)))
 	
 	groups = dict()
 	uniques_all = list()
@@ -195,10 +205,10 @@ def read_and_work(input_file_path, low_filter_bytes, high_filter_bytes):
 	
 	
 	# TODO(armagans): Reduce hex bytes. External disk takes too long time.
-	info_creator_funs = [util.get_file_size_in_bytes,
-						util.hex_sha512_X_byte(4*1024), # 4Kb
-						util.hex_sha512_X_byte(128*1024), # 128Kb
-						util.hex_sha512_X_byte(2*1024*1024) # 2Mb
+	info_creator_funs = [util.get_file_size_in_bytes
+						#util.hex_sha512_X_byte(4*1024), # 4Kb
+						#util.hex_sha512_X_byte(128*1024), # 128Kb
+						#util.hex_sha512_X_byte(2*1024*1024) # 2Mb
 						
 						
 						#util.hex_sha512_X_byte(256)
