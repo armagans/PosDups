@@ -41,10 +41,7 @@ def create_path_info(path_line):
 	result["is_recursive"] = left.startswith("rec")
 	exclude = True if left[-1] == "x" else False
 	result["exclude"] = exclude
-	
-	print(path_line)
-	print(result)
-	
+
 	return result
 #
 
