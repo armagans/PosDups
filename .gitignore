@@ -2,3 +2,5 @@ __pycache__
 out.txt
 external disk.txt
 out-ext-disk-only-size-no-filter.txt
+out-ext-2Mfilter-size-1K,16K.txt
+out-ext-2Mfilter-size-1K,16K,1M.txt

@@ -173,8 +173,12 @@ def group_files_multi_pass(abs_file_paths, info_creator_funs):
 #
 
 
-def read_and_work(input_file_path, low_filter_bytes, high_filter_bytes):
+def read_and_work(input_file_path, args):
 	# input_file_path = "directory paths.txt"
+	low_filter_bytes = args.filterLower
+	high_filter_bytes = args.filterHigher
+	hashes = args.hashes
+	
 	if low_filter_bytes == None:
 		low_filter_bytes = 0
 	#
@@ -208,13 +212,25 @@ def read_and_work(input_file_path, low_filter_bytes, high_filter_bytes):
 	
 	filtered_paths = filter(filter_func, fpaths)
 	
+	info_creator_funs = []
+	if hashes == None:
+		# default sha512 sequence: 1*1024, 16*1024, 1*1024*1024
+		# TODO(armagans): Reduce hex bytes (maybe 1Mb). External disk takes too long time.
+		info_creator_funs = [util.get_file_size_in_bytes,
+							util.hex_sha512_X_byte(1*1024),
+							util.hex_sha512_X_byte(16*1024),
+							util.hex_sha512_X_byte(1*1024*1024)
+							]
+	#
+	else:
+		byte_seq = util.get_bytes_from_size_seq(hashes)
+		info_creator_funs = [util.get_file_size_in_bytes]
+		for byt in byte_seq:
+			info_creator_funs.append(util.hex_sha512_X_byte(byt))
+		#
+	#
+		
 	
-	# TODO(armagans): Reduce hex bytes. External disk takes too long time.
-	info_creator_funs = [util.get_file_size_in_bytes,
-						util.hex_sha512_X_byte(1*1024),
-						util.hex_sha512_X_byte(16*1024),
-						util.hex_sha512_X_byte(1*1024*1024)
-						]
 	
 	group_files_multi_pass(filtered_paths, info_creator_funs)
 #
@@ -237,13 +253,12 @@ if __name__ == "__main__":
 	
 	parser.add_argument("-fh", "--filterHigher", type=int,
 						help="excludes files bigger than given count in bytes.")
+						
+	parser.add_argument("-hs", "--hashes",
+						help="denotes the checksum byte sequence. Ex: 128Kb, 4Mb, 2Gb")
+						
+						
 	args = parser.parse_args()
-	
-	#print(args.filterLower * 2)
-	
-	
-		
-	
 	
 	
 	input_file_path = "directory paths.txt"
@@ -251,7 +266,7 @@ if __name__ == "__main__":
 	#input_file_path = ""
 	
 	print(time.ctime())
-	read_and_work(input_file_path, args.filterLower, args.filterHigher)
+	read_and_work(input_file_path, args)
 	
 	print(time.ctime())
 

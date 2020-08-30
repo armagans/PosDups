@@ -1,3 +1,10 @@
+0.6.0-beta (2020-08-30-12-25):
+	+ Added -hs --hashes option which accepts a sequence of bytes to be 
+	used in checksum.
+	Example: 
+		python3 PosDups.py -hs 1kb,128kb,5Mb,3Gb
+		This command will use file sizes first to group. Then, in order,
+		applies sha512 to and groups files read in 1kb, 128kb, 5mb, 3gb sizes.
 -----
 0.5.0-beta (2020-08-29-22-05):
 	+ Added -fl --filterLower command line option. Given an int, filters

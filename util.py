@@ -158,3 +158,18 @@ def get_size_str(size_in_bytes):
 		return "Error calculating size str for " + str(size_in_bytes)
 	#
 #
+
+
+def get_byte_from_size_str(size):
+	d = {"kb": 1024, "mb": 1048576, "gb": 1073741824}
+
+	multiplier = int(size[:-2])
+	ident = d[size[-2:]]
+
+	return multiplier * ident
+#
+
+
+def get_bytes_from_size_seq(sizes):
+	return [get_byte_from_size_str(el) for el in sizes.lower().split(',')]
+#
