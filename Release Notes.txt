@@ -1,3 +1,11 @@
+0.8.0-beta:
+	+ Added --inputfile, -inf command line argument. You can use this argument
+	instead of IO redirection.
+	Example:
+		python3 __main__.py -inf "../paths.txt"  > "out file.txt"
+		This command reads paths from paths.txt and writes results to 
+		"out file.txt".
+-----
 0.7.0-beta:
 	+ posdups now reads paths only from stdin.
 	Example:

@@ -173,3 +173,44 @@ def get_byte_from_size_str(size):
 def get_bytes_from_size_seq(sizes):
 	return [get_byte_from_size_str(el) for el in sizes.lower().split(',')]
 #
+
+def print_results(uniques_all, groups, out_file):
+	# TODO(armagans): Write a better print function.
+	# TODO(armagans): Handle out_file if given. Write to it.
+	#print("Given output file: "+str(out_file))
+	total = 0
+	print("Uniques:")
+	unq_cnt = 0
+	for elm in uniques_all:
+		size = get_file_size_in_bytes(elm)
+		#size = str(size//1024) + "Kb" if size//1024 > 1 else str(size) + "B"
+		
+		size = get_size_str(size)
+		
+		s = format_distinct_path(unq_cnt, size, "*", elm)
+		print(s)
+		#print(size,"kb * ", elm)
+		unq_cnt += 1
+		total += 1
+	#
+	print("**************")
+	print("Probably identical files in groups:")
+	cnt = 0
+	for k,v in groups.items():
+		#print(k, " | ")
+		for el in v:
+			size = get_file_size_in_bytes(el)
+			#size = str(size//1024) + "Kb" if size//1024 > 1 else str(size) + "B"
+			
+			size = get_size_str(size)
+			
+			s = format_similar_path(cnt, size, "*", el)
+			print(s)
+			#print(size,"kb * ", el)
+			total += 1
+		#
+		cnt += 1
+		print()
+	#	#print("-----------------*")
+	print("Processed {} files.".format(total))
+#

@@ -97,45 +97,6 @@ def get_file_paths_from_groups(groups):
 #
 
 
-def print_results(uniques_all, groups):
-	total = 0
-	print("Uniques:")
-	unq_cnt = 0
-	for elm in uniques_all:
-		size = util.get_file_size_in_bytes(elm)
-		#size = str(size//1024) + "Kb" if size//1024 > 1 else str(size) + "B"
-		
-		size = util.get_size_str(size)
-		
-		s = util.format_distinct_path(unq_cnt, size, "*", elm)
-		print(s)
-		#print(size,"kb * ", elm)
-		unq_cnt += 1
-		total += 1
-	#
-	print("**************")
-	print("Probably identical files in groups:")
-	cnt = 0
-	for k,v in groups.items():
-		#print(k, " | ")
-		for el in v:
-			size = util.get_file_size_in_bytes(el)
-			#size = str(size//1024) + "Kb" if size//1024 > 1 else str(size) + "B"
-			
-			size = util.get_size_str(size)
-			
-			s = util.format_similar_path(cnt, size, "*", el)
-			print(s)
-			#print(size,"kb * ", el)
-			total += 1
-		#
-		cnt += 1
-		print()
-	#	#print("-----------------*")
-	print("Processed {} files.".format(total))
-#
-
-
 def group_files_multi_pass(abs_file_paths, info_creator_funs):
 	""" Using first creator fun, create a group. Seperate uniques and
 		use next creator fun for the remaining groups. Iterate until 
@@ -165,15 +126,11 @@ def group_files_multi_pass(abs_file_paths, info_creator_funs):
 	# TODO(armagans): Output should be separate. Also, don't print, 
 	# write to file. Stdout by default.
 	
-	
-	
-	print_results(uniques_all, groups)
-	
-	
+	return [uniques_all, groups]
 #
 
 
-def read_and_work(file_obj, args):
+def read_and_work(path_lines, args):
 	# input_file_path = "directory paths.txt"
 	low_filter_bytes = args.filterLower
 	high_filter_bytes = args.filterHigher
@@ -183,7 +140,7 @@ def read_and_work(file_obj, args):
 		low_filter_bytes = 0
 	#
 	
-	lines = file_obj.readlines()
+	lines = path_lines
 	
 	path_info_list = []
 	for el in lines:
@@ -224,7 +181,8 @@ def read_and_work(file_obj, args):
 		info_creator_funs.append(util.hex_sha512_X_byte(byt))
 	#
 	
-	group_files_multi_pass(filtered_paths, info_creator_funs)
+	# Returns [unique files, same file groups]
+	return group_files_multi_pass(filtered_paths, info_creator_funs)
 #
 
 
