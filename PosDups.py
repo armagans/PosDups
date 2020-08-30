@@ -3,23 +3,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program (COPYING).  If not, see <https://www.gnu.org/licenses/>.
 
+
 """
-This program finds same files using size and hash values. It 
-is not guaranteed that files in a group are exactly the same.
+This program finds same files using size and hash values and groups them.
+It is not guaranteed that files in a group are exactly the same.
 
 In main, input_file_path holds a txt file that contains paths to be searched.
 In the txt file, if a path is to be searched recursively, prepend 
 Recursive *
 to that path. Else, prepend * character to path.
 
-!Enable filter_func in read_and_work if there are thousands of small files.
+Use -fl X or --filterLower X option to exclude files smaller than X bytes
+if there are thousands of small files.
 
 TODO(armagans): Handle the case Recursive * Valid/file/path
 """
 
 import os
 import hashlib
-import optparse # TODO(armagans): Use it for inputs with option (argument).
 import time
 import argparse
 
@@ -197,26 +198,22 @@ def read_and_work(input_file_path, low_filter_bytes, high_filter_bytes):
 			decision = True
 			
 			if high_filter_bytes != None:
-				decision = size <= high_filter_bytes # Accept on if size >= low_filter_bytes bytes
+				decision = size <= high_filter_bytes
 			#
-			decision = decision and size >= low_filter_bytes # Accept on if size >= low_filter_bytes bytes
+			decision = decision and size >= low_filter_bytes
 			return decision
 		except:
 			return False
 	#
 	
 	filtered_paths = filter(filter_func, fpaths)
-	#filtered_paths = filter(lambda x: True, fpaths)
 	
 	
 	# TODO(armagans): Reduce hex bytes. External disk takes too long time.
-	info_creator_funs = [util.get_file_size_in_bytes
-						#util.hex_sha512_X_byte(4*1024), # 4Kb
-						#util.hex_sha512_X_byte(128*1024), # 128Kb
-						#util.hex_sha512_X_byte(2*1024*1024) # 2Mb
-						
-						
-						#util.hex_sha512_X_byte(256)
+	info_creator_funs = [util.get_file_size_in_bytes,
+						util.hex_sha512_X_byte(1*1024),
+						util.hex_sha512_X_byte(16*1024),
+						util.hex_sha512_X_byte(1*1024*1024)
 						]
 	
 	group_files_multi_pass(filtered_paths, info_creator_funs)
@@ -251,7 +248,7 @@ if __name__ == "__main__":
 	
 	input_file_path = "directory paths.txt"
 	#input_file_path = "external disk.txt"
-	#input_file_path = "ext-disk-1mb-filter-size-1024b-out-fresh.txt"
+	#input_file_path = ""
 	
 	print(time.ctime())
 	read_and_work(input_file_path, args.filterLower, args.filterHigher)

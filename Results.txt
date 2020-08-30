@@ -1,0 +1,14 @@
+External disk cold:
+	Sun Aug 30 09:54:44 2020 -> Sun Aug 30 10:04:26 2020
+	Processed 336791 files.
+	Only size, no filter, no checksum.
+	
+	
+	Sun Aug 30 10:40:20 2020 -> Sun Aug 30 11:05:43 2020
+	Processed 14708 files.
+	2Mil lower filter, size, 1K,16K,1M checksums
+	
+	
+	Sun Aug 30 11:17:59 2020 -> Sun Aug 30 11:30:52 2020
+	Processed 14708 files.
+	2Mil lower filter, size, 1K,16K checksums

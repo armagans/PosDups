@@ -69,9 +69,6 @@ def get_file_size_in_bytes(path):
 def read_all_lines(input_file_path):
 	with open(input_file_path, "r") as f:
 		lines = f.readlines()
-		#print(len(lines))
-		#for el in lines:
-		#	print(el)
 		return lines
 	#
 #
@@ -136,7 +133,6 @@ def format_distinct_path(distinct_num, size, separator, path):
 	# size is currently in bytes.
 	return str.format("Distinct-{} | Size-{} {} {}", 
 						distinct_num, size, separator, path)
-	#return "Distinct" + str(info) + separator + path
 #
 
 
@@ -144,7 +140,6 @@ def format_similar_path(group_num, size, separator, path):
 	# size is currently in bytes.
 	return str.format("Group-{} | Size-{} {} {}", 
 						group_num, size, separator, path)
-	#return "Group-" + group_num + str(info) + separator + path
 #
 
 
