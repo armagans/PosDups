@@ -1,3 +1,9 @@
+# Copyright (C) 2020 Armağan Salman
+#
+# You should have received a copy of the GNU General Public License
+# along with this program (COPYING).  If not, see <https://www.gnu.org/licenses/>.
+
+
 import os
 import hashlib
 

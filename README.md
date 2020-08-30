@@ -14,4 +14,6 @@ Examples:
   python3 PosDups.py > out.txt -filterLower 131072  ==  Exclude files smaller than 128Kb, then write results to "out.txt"
   python3 PosDups.py > out.txt -fl 131072  ==  Exclude files smaller than 128Kb, then write results to "out.txt"
   python3 PosDups.py > out.txt -fl 131072 -fh 20971520 == Exclude files smaller than 128Kb and bigger than 20Mb then write results to "out.txt"
-  
+
+Contact info:
+  Gmail:armagan.sal.man+posdups

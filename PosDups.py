@@ -1,3 +1,8 @@
+# Copyright (C) 2020 Armağan Salman
+#
+# You should have received a copy of the GNU General Public License
+# along with this program (COPYING).  If not, see <https://www.gnu.org/licenses/>.
+
 """
 This program finds same files using size and hash values. It 
 is not guaranteed that files in a group are exactly the same.
