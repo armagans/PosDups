@@ -3,7 +3,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program (COPYING).  If not, see <https://www.gnu.org/licenses/>.
 
-
+import sys
 import os
 import hashlib
 
@@ -174,12 +174,13 @@ def get_bytes_from_size_seq(sizes):
 	return [get_byte_from_size_str(el) for el in sizes.lower().split(',')]
 #
 
-def print_results(uniques_all, groups, out_file):
+def write_results(uniques_all, groups, out_file_path, times):
 	# TODO(armagans): Write a better print function.
 	# TODO(armagans): Handle out_file if given. Write to it.
-	#print("Given output file: "+str(out_file))
+	out = [ times["start"] ]
+	#out.append("Given output file: "+str(out_file_path))
 	total = 0
-	print("Uniques:")
+	out.append("Uniques:")
 	unq_cnt = 0
 	for elm in uniques_all:
 		size = get_file_size_in_bytes(elm)
@@ -188,13 +189,13 @@ def print_results(uniques_all, groups, out_file):
 		size = get_size_str(size)
 		
 		s = format_distinct_path(unq_cnt, size, "*", elm)
-		print(s)
+		out.append(s)
 		#print(size,"kb * ", elm)
 		unq_cnt += 1
 		total += 1
 	#
-	print("**************")
-	print("Probably identical files in groups:")
+	out.append("**************")
+	out.append("Probably identical files in groups:")
 	cnt = 0
 	for k,v in groups.items():
 		#print(k, " | ")
@@ -205,12 +206,47 @@ def print_results(uniques_all, groups, out_file):
 			size = get_size_str(size)
 			
 			s = format_similar_path(cnt, size, "*", el)
-			print(s)
+			out.append(s)
 			#print(size,"kb * ", el)
 			total += 1
 		#
 		cnt += 1
-		print()
+		out.append("") # Will be \n to separate groups
 	#	#print("-----------------*")
-	print("Processed {} files.".format(total))
+	out.append(times["end"])
+	out.append("Processed {} files.".format(total))
+	
+	if out_file_path == None:
+		sys.stdout.write("\n".join(out))
+		pass
+	else:
+		# write to given file.
+		with open(out_file_path, "a") as w:
+			w.write("\n".join(out))
+#
+
+def increment_file_name(given_path):
+	i = 1
+	fpath = given_path
+	while is_file(fpath):
+		#fpath = str.format("", str(i), base)
+		dot = fpath.rfind(".")
+		name, ext = fpath[:dot], fpath[dot:]
+		
+		dash = name.rfind("-")
+		if dash >= 0:
+			num = name[dash+1:dot]
+			i = int(num)+1
+			name = str.format("{}-{}", name[:dash], str(i))
+		#
+		else:
+			name = str.format("{}-{}", name, str(i))
+			i = i+1
+		#
+		fpath = name + ext
+	#
+	if fpath != given_path:
+		print("Changed given path to: " + fpath)
+	#
+	return fpath
 #

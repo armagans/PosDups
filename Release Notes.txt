@@ -1,3 +1,12 @@
+0.9.0-beta:
+	+ Added --outputfile, -outf argument. You can use this argument
+	instead of IO redirection for output.
+	Example:
+		python3 __main__.py -inf "../paths.txt" -outf "out file.txt"
+	
+	+ If an existing output file is given, a numbered version of it will 
+	be used instead for writing results.
+-----
 0.8.0-beta:
 	+ Added --inputfile, -inf command line argument. You can use this argument
 	instead of IO redirection.

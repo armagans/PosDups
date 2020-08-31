@@ -30,7 +30,7 @@ def create_path_info(path_line):
 	# Tries to walk path recursively if given line starts with lower 
 	# cased "rec"
 	# TODO(armagans): Add exclude capability.
-	left, right = path_line.split("*")
+	left, right = path_line.split("*", 1) # Split on first occurence only.
 	left = left.strip()
 	right = right.strip()
 	
