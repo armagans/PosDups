@@ -5,7 +5,7 @@ lines.
 Read _paths.txt_ to understand how to make PosDups search a 
 directory recursively.
 
-Use **--help** option to see usage of file filters by size.
+Use **--help** option to see usage of file filters by size. Plus other command line arguments.
 
 Examples:
   - python3 \_\_main__.py < "../paths.txt" > out.txt --filterLower 131072  ==  Exclude files smaller than 128Kb, then write results to "out.txt"
