@@ -132,9 +132,9 @@ def group_files_multi_pass(abs_file_paths, info_creator_funs):
 
 def read_and_work(path_lines, args):
 	# input_file_path = "directory paths.txt"
-	low_filter_bytes = args.filterLower
-	high_filter_bytes = args.filterHigher
-	hashes = args.hashes
+	low_filter_bytes = args.filterSmaller
+	high_filter_bytes = args.filterBigger
+	hashes = args.checksums
 	
 	if low_filter_bytes == None:
 		low_filter_bytes = 0

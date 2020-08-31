@@ -1,3 +1,11 @@
+0.10.0-beta:
+	+ Changed command line arguments.
+	-fl, --filterLower -> -s, --filterSmaller
+	-fh, --FilterHigher -> -b, --filterBigger
+	-hs, --hashes -> -c, --checksums
+	-inf -> -i
+	-outf -> -o
+-----
 0.9.0-beta:
 	+ Added --outputfile, -outf argument. You can use this argument
 	instead of IO redirection for output.

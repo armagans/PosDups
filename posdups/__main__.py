@@ -13,18 +13,18 @@ def build_args(args):
 	#
 	parser = argparse.ArgumentParser()
 	# parser.add_argument("square", type=int, help="display a square of a given number") # Positional arg.
-	parser.add_argument("-fl", "--filterLower", type=int,
+	parser.add_argument("-s", "--filterSmaller", type=int,
 						help="excludes files smaller than given count in bytes.")
 	
-	parser.add_argument("-fh", "--filterHigher", type=int,
+	parser.add_argument("-b", "--filterBigger", type=int,
 						help="excludes files bigger than given count in bytes.")
 						
-	parser.add_argument("-hs", "--hashes",
+	parser.add_argument("-c", "--checksums",
 						help="denotes the checksum byte sequence. Ex: 128Kb, 4Mb, 2Gb")
 						
-	parser.add_argument("-inf", "--inputfile", help="path of the input file which contains paths.")
+	parser.add_argument("-i", "--inputfile", help="path of the input file which contains paths.")
 						
-	parser.add_argument("-outf", "--outputfile", help="path of the output file which will have the results.")
+	parser.add_argument("-o", "--outputfile", help="path of the output file which will have the results.")
 	
 	return parser.parse_args(args)
 #
@@ -33,8 +33,8 @@ def main(args):
 	
 	parsed_args = build_args(args)
 	
-	if parsed_args.hashes == None:
-		parsed_args.hashes = "1kb,16kb,1mb"
+	if parsed_args.checksums == None:
+		parsed_args.checksums = "1kb,16kb,1mb"
 	
 	tm = dict()
 	tm["start"] = time.ctime()
