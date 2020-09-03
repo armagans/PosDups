@@ -231,13 +231,21 @@ def increment_file_name(given_path):
 	while is_file(fpath):
 		#fpath = str.format("", str(i), base)
 		dot = fpath.rfind(".")
+		if dot == -1: # Means no extension.
+			dot = len(fpath)
+		#
 		name, ext = fpath[:dot], fpath[dot:]
 		
 		dash = name.rfind("-")
 		if dash >= 0:
 			num = name[dash+1:dot]
-			i = int(num)+1
-			name = str.format("{}-{}", name[:dash], str(i))
+			try:
+				i = int(num)
+				name = str.format("{}-{}", name[:dash], str(i+1))
+			except: # "out-abc123.txt", num == abc123
+				name = str.format("{}-{}", name[:dot], str(i))
+			#
+			
 		#
 		else:
 			name = str.format("{}-{}", name, str(i))

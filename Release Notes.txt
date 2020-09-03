@@ -1,3 +1,8 @@
+0.10.2-alpha:
+	- IO redirection does not work on Windows. Use -i for input, -o for output instead.
+	+ Fixed output file name incrementor function. Was giving error on file names with dash
+	character. ("out-abc123.txt")
+-----
 0.10.1-beta:
 	+ On Windows, UnicodeError when writing to file is fixed.
 -----
