@@ -6,7 +6,7 @@ Paths can be directories or files.
 Recursive * this/path/will/be/searched/recursively
 
 
-
+Recursive * E:\
 Recursive * ../
 * ./
 * /media/ulimited/SharedWithLinux/ALL BOOKS-PAPERS/Non-academic Documents-Books/

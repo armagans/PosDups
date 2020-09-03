@@ -67,7 +67,7 @@ def get_file_size_in_bytes(path):
 
 
 def read_all_lines(input_file_path):
-	with open(input_file_path, "r") as f:
+	with open(input_file_path, "r", encoding="utf-8") as f:
 		lines = f.readlines()
 		return lines
 	#
@@ -221,7 +221,7 @@ def write_results(uniques_all, groups, out_file_path, times):
 		pass
 	else:
 		# write to given file.
-		with open(out_file_path, "a") as w:
+		with open(out_file_path, "a", encoding="utf-8") as w:
 			w.write("\n".join(out))
 #
 

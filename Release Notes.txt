@@ -1,3 +1,6 @@
+0.10.1-beta:
+	+ On Windows, UnicodeError when writing to file is fixed.
+-----
 0.10.0-beta:
 	+ Changed command line arguments.
 	-fl, --filterLower -> -s, --filterSmaller
