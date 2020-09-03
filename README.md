@@ -8,7 +8,7 @@ directory recursively.
 Use **--help** option to see usage of file filters by size. Plus other command line arguments.
 
 **IMPORTANT** For input and output files the first * character from the left denotes the split point. Do not put more than one * character before the path.
-IO redirection doesn't work properly for now. Use -i and -o arguments instead.
+IO redirection doesn't work properly on Windows for now. Use -i and -o arguments instead.
 
 Examples:
   - python3 \_\_main__.py -i "../paths.txt" -o out.txt --filterSmaller 131072  ==  Exclude files smaller than 128Kb, then write results to "out.txt"
