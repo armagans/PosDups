@@ -50,12 +50,13 @@ def file_list_grouper(file_paths, info_creator):
 	""" Groups are sets that hold paths of similar files. Groups are 
 		designated by their corresponding hashables.
 	"""
+	# TODO(armagans): Write error messages to stderr.
 	groups = dict()
 	for path in file_paths:
 		try:
 			hashable = info_creator(path)
 		except:
-			print("Error with path '%s'.", path)
+			print("Error with path: ", path)
 			continue
 		
 		if hashable not in groups: # A set exists for this hashable/group.
